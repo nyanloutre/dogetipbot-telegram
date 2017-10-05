@@ -6,6 +6,7 @@ import os
 BLOCK_IO_API_KEY = os.environ['BLOCK_IO_API_KEY']
 BLOCK_IO_PIN = os.environ['BLOCK_IO_PIN']
 TELEGRAM_API_KEY = os.environ['TELEGRAM_API_KEY']
+NETWORK = os.environ['NETWORK']
 
 # Exceptions
 
@@ -31,7 +32,7 @@ def get_balance(account):
     except BlockIoAPIError:
         raise NoAccountError(account)
     else:
-        return float(response['data']['available_balance'])
+        return (float(response['data']['available_balance']), float(response['data']['pending_received_balance']))
 
 def create_address(account):
     try:
@@ -51,7 +52,7 @@ def get_address(account):
 
 def transaction(sender, receiver, amount):
     try:
-        if get_balance(sender) > amount:
+        if get_balance(sender)[0] > amount:
             address_receiver = get_address(receiver)
             return block_io.withdraw_from_labels(amounts=amount, from_labels=sender, to_labels=receiver)
         else:
@@ -63,7 +64,7 @@ def transaction(sender, receiver, amount):
 
 def address_transaction(account, address, amount):
     try:
-        if get_balance(account) > amount:
+        if get_balance(account)[0] > amount:
             return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address)
         else:
             return "Pas assez de doge"
@@ -87,7 +88,7 @@ def dogetip(bot, update, args):
 
     txid = response['data']['txid']
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/DOGETEST/" + txid + ")")
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text=🚀 Transaction effectuée 🚀\n\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
 
 def register(bot, update):
     try:
@@ -100,11 +101,11 @@ def register(bot, update):
 def infos(bot, update):
     try:
         address = get_address(update.message.from_user.username)
-        balance = get_balance(update.message.from_user.username)
+        balance, unconfirmed_balance = get_balance(update.message.from_user.username)
     except NoAccountError as e:
         bot.send_message(chat_id=update.message.chat_id, text="Merci de vous créer un compte @" + str(e))
     else:
-        bot.send_message(chat_id=update.message.chat_id, text=address + "\n" + str(balance) + " DOGE")
+        bot.send_message(chat_id=update.message.chat_id, text=address + "\n\n" + str(balance) + " " + NETWORK + "\n" + str(unconfirmed_balance) + " " + NETWORK + " unconfirmed")
 
 def withdraw(bot, update, args):
     montant = int(args[0])
@@ -116,7 +117,7 @@ def withdraw(bot, update, args):
 
     txid = response['data']['txid']
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/DOGETEST/" + txid + ")")
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
 
 # Telegram initialisation
 
