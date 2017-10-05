@@ -88,7 +88,12 @@ def dogetip(bot, update, args):
 
     txid = response['data']['txid']
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="🚀 Transaction effectuée 🚀\n\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
+    message = "🚀 Transaction effectuée 🚀\n\n" \
+              + str(montant) + " " + NETWORK + "\n" \
+              + update.message.from_user.username + " → " + destinataire + "\n\n" \
+              + "[Voir la transaction](https://chain.so/tx/" + NETWORK + "/" + txid + ")"
+
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text=message)
 
 def register(bot, update):
     try:
