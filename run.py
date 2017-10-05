@@ -1,7 +1,7 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import ParseMode
 from block_io import BlockIo, BlockIoAPIError
-import io
+import os
 
 BLOCK_IO_API_KEY = os.environ['BLOCK_IO_API_KEY']
 BLOCK_IO_PIN = os.environ['BLOCK_IO_PIN']
@@ -61,6 +61,17 @@ def transaction(sender, receiver, amount):
     except BlockIoAPIError:
         return "Erreur d'API"
 
+def address_transaction(account, address, amount):
+    try:
+        if get_balance(account) > amount:
+            return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address)
+        else:
+            return "Pas assez de doge"
+    except NoAccountError as e:
+        return "Merci de vous créer un compte @" + str(e)
+    except BlockIoAPIError:
+        return "Erreur d'API"
+
 # Telegram functions
 
 def start(bot, update):
@@ -95,6 +106,18 @@ def infos(bot, update):
     else:
         bot.send_message(chat_id=update.message.chat_id, text=address + "\n" + str(balance) + " DOGE")
 
+def withdraw(bot, update, args):
+    montant = int(args[0])
+    unit = args[1]
+    address = args[2]
+
+    if unit == "doge":
+        response = address_transaction(update.message.from_user.username, address, montant)
+
+    txid = response['data']['txid']
+
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/DOGETEST/" + txid + ")")
+
 # Telegram initialisation
 
 updater = Updater(token=TELEGRAM_API_KEY)
@@ -112,4 +135,6 @@ dispatcher.add_handler(register_handler)
 infos_handler = CommandHandler('infos', infos)
 dispatcher.add_handler(infos_handler)
 
+withdraw_handler = CommandHandler('withdraw', withdraw, pass_args=True)
+dispatcher.add_handler(withdraw_handler)
 updater.start_polling()
