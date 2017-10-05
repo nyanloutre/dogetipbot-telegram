@@ -54,7 +54,7 @@ def transaction(sender, receiver, amount):
     try:
         if get_balance(sender)[0] > amount:
             address_receiver = get_address(receiver)
-            return block_io.withdraw_from_labels(amounts=amount, from_labels=sender, to_labels=receiver)
+            return block_io.withdraw_from_labels(amounts=amount, from_labels=sender, to_labels=receiver, priority="low")
         else:
             return "Pas assez de doge"
     except NoAccountError as e:
@@ -65,7 +65,7 @@ def transaction(sender, receiver, amount):
 def address_transaction(account, address, amount):
     try:
         if get_balance(account)[0] > amount:
-            return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address)
+            return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address, priority="low")
         else:
             return "Pas assez de doge"
     except NoAccountError as e:
