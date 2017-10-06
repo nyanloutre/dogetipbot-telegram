@@ -1,12 +1,18 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import ParseMode
 from block_io import BlockIo, BlockIoAPIError
+import logging
 import os
 
 BLOCK_IO_API_KEY = os.environ['BLOCK_IO_API_KEY']
 BLOCK_IO_PIN = os.environ['BLOCK_IO_PIN']
 TELEGRAM_API_KEY = os.environ['TELEGRAM_API_KEY']
 NETWORK = os.environ['NETWORK']
+
+# Logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Exceptions
 
