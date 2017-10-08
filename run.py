@@ -81,14 +81,13 @@ def start(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Bark ! Je suis un tipbot Dogecoin ! \n\n Pour commencer envoyez moi /register")
 
 def dogetip(bot, update, args):
-
-    if len(args != 3):
-        bot.send_message(chat_id=update.message.chat_id, text="Syntaxe : /dogetip xxx doge @destinataire")
-    else:
+    try:
         montant = int(args[0])
         unit = args[1]
         destinataire = args[2][1:]
-
+    except (IndexError, ValueError):
+        bot.send_message(chat_id=update.message.chat_id, text="Syntaxe : /dogetip xxx doge @destinataire")
+    else:
         try:
             if unit == "doge":
                 response = transaction(update.message.from_user.username, destinataire, montant)
