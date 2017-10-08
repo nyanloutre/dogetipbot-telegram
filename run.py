@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.ERROR,
 class NoAccountError(Exception):
     pass
 
-class BalanceError(Exception):
+class NotEnoughDoge(Exception):
     pass
 
 class AccountExisting(Exception):
@@ -62,22 +62,18 @@ def transaction(sender, receiver, amount):
             address_receiver = get_address(receiver)
             return block_io.withdraw_from_labels(amounts=amount, from_labels=sender, to_labels=receiver, priority="low")
         else:
-            return "Pas assez de doge"
-    except NoAccountError as e:
-        return "Merci de vous créer un compte @" + str(e)
-    except BlockIoAPIError:
-        return "Erreur d'API"
+            raise NotEnoughDoge
+    except NoAccountError:
+        raise
 
 def address_transaction(account, address, amount):
     try:
         if get_balance(account)[0] > amount:
             return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address, priority="low")
         else:
-            return "Pas assez de doge"
-    except NoAccountError as e:
-        return "Merci de vous créer un compte @" + str(e)
-    except BlockIoAPIError:
-        return "Erreur d'API"
+            return NotEnoughDoge
+    except NoAccountError:
+        raise
 
 # Telegram functions
 
@@ -89,14 +85,16 @@ def dogetip(bot, update, args):
     unit = args[1]
     destinataire = args[2][1:]
 
-    if unit == "doge":
-        response = transaction(update.message.from_user.username, destinataire, montant)
-
     try:
-        txid = response['data']['txid']
-    except TypeError:
-        message = response
+        if unit == "doge":
+            response = transaction(update.message.from_user.username, destinataire, montant)
+    except NotEnoughDoge:
+        message = "Pas assez de doge @" + update.message.from_user.username
+    except NoAccountError as e:
+        message = "Vous n'avez pas de compte @" + e + '\n\n' \
+                  + "Utilisez /register pour démarrer"
     else:
+        txid = response['data']['txid']
         message = '🚀 Transaction effectuée 🚀\n\n' \
                   + str(montant) + ' ' + NETWORK + '\n' \
                   + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
@@ -117,7 +115,7 @@ def infos(bot, update):
         address = get_address(update.message.from_user.username)
         balance, unconfirmed_balance = get_balance(update.message.from_user.username)
     except NoAccountError as e:
-        bot.send_message(chat_id=update.message.chat_id, text="Merci de vous créer un compte @" + str(e))
+        bot.send_message(chat_id=update.message.chat_id, text="Vous n'avez pas de compte @" + e + '\n\n' + "Utilisez /register pour démarrer")
     else:
         bot.send_message(chat_id=update.message.chat_id, text=address + "\n\n" + str(balance) + " " + NETWORK + "\n" + str(unconfirmed_balance) + " " + NETWORK + " unconfirmed")
 
