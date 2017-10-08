@@ -25,6 +25,9 @@ class NotEnoughDoge(Exception):
 class AccountExisting(Exception):
     pass
 
+class NotValidUnit(Exception):
+    pass
+
 # BlockIO
 
 version = 2
@@ -91,11 +94,15 @@ def dogetip(bot, update, args):
         try:
             if unit == "doge":
                 response = transaction(update.message.from_user.username, destinataire, montant)
+            else:
+                raise NotValidUnit(unit)
         except NotEnoughDoge:
             message = "Pas assez de doge @" + update.message.from_user.username
         except NoAccountError as e:
             message = "Vous n'avez pas de compte @" + str(e) + '\n\n' \
                     + "Utilisez /register pour démarrer"
+        except NotValidUnit as e:
+            message = str(e) " n'est pas une unité valide"
         else:
             txid = response['data']['txid']
             message = '🚀 Transaction effectuée 🚀\n\n' \
