@@ -102,7 +102,7 @@ def dogetip(bot, update, args):
             message = "Vous n'avez pas de compte @" + str(e) + '\n\n' \
                     + "Utilisez /register pour démarrer"
         except NotValidUnit as e:
-            message = str(e) " n'est pas une unité valide"
+            message = str(e) + " n'est pas une unité valide"
         else:
             txid = response['data']['txid']
             message = '🚀 Transaction effectuée 🚀\n\n' \
