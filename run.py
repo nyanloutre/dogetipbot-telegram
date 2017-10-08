@@ -149,4 +149,6 @@ dispatcher.add_handler(infos_handler)
 
 withdraw_handler = CommandHandler('withdraw', withdraw, pass_args=True)
 dispatcher.add_handler(withdraw_handler)
+
 updater.start_polling()
+updater.idle()
