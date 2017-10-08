@@ -91,7 +91,7 @@ def dogetip(bot, update, args):
     except NotEnoughDoge:
         message = "Pas assez de doge @" + update.message.from_user.username
     except NoAccountError as e:
-        message = "Vous n'avez pas de compte @" + e + '\n\n' \
+        message = "Vous n'avez pas de compte @" + str(e) + '\n\n' \
                   + "Utilisez /register pour démarrer"
     else:
         txid = response['data']['txid']
@@ -115,7 +115,7 @@ def infos(bot, update):
         address = get_address(update.message.from_user.username)
         balance, unconfirmed_balance = get_balance(update.message.from_user.username)
     except NoAccountError as e:
-        bot.send_message(chat_id=update.message.chat_id, text="Vous n'avez pas de compte @" + e + '\n\n' + "Utilisez /register pour démarrer")
+        bot.send_message(chat_id=update.message.chat_id, text="Vous n'avez pas de compte @" + str(e) + '\n\n' + "Utilisez /register pour démarrer")
     else:
         bot.send_message(chat_id=update.message.chat_id, text=address + "\n\n" + str(balance) + " " + NETWORK + "\n" + str(unconfirmed_balance) + " " + NETWORK + " unconfirmed")
 
