@@ -130,6 +130,9 @@ def withdraw(bot, update, args):
 
     bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
 
+def testing(bot, update):
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Bonjour V_IAL")
+
 # Telegram initialisation
 
 updater = Updater(token=TELEGRAM_API_KEY)
@@ -149,6 +152,9 @@ dispatcher.add_handler(infos_handler)
 
 withdraw_handler = CommandHandler('withdraw', withdraw, pass_args=True)
 dispatcher.add_handler(withdraw_handler)
+
+testing_handler = CommandHandler('testing', testing)
+dispatcher.add_handler(testing_handler)
 
 updater.start_polling()
 updater.idle()
