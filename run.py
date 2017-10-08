@@ -94,12 +94,12 @@ def dogetip(bot, update, args):
 
     txid = response['data']['txid']
 
-    message = "🚀 Transaction effectuée 🚀\n\n" \
-              + str(montant) + " " + NETWORK + "\n" \
-              + update.message.from_user.username + " → " + destinataire + "\n\n" \
-              + "[Voir la transaction](https://chain.so/tx/" + NETWORK + "/" + txid + ")"
+    message = '🚀 Transaction effectuée 🚀\n\n' \
+              + str(montant) + ' ' + NETWORK + '\n' \
+              + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
+              + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text=message)
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.HTML, text=message)
 
 def register(bot, update):
     try:
@@ -131,7 +131,7 @@ def withdraw(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
 
 def testing(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Bonjour V_IAL")
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Bonjour @V_IAL")
 
 # Telegram initialisation
 
