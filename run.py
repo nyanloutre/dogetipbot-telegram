@@ -78,29 +78,33 @@ def address_transaction(account, address, amount):
 # Telegram functions
 
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
+    bot.send_message(chat_id=update.message.chat_id, text="Bark ! Je suis un tipbot Dogecoin ! \n\n Pour commencer envoyez moi /register")
 
 def dogetip(bot, update, args):
-    montant = int(args[0])
-    unit = args[1]
-    destinataire = args[2][1:]
 
-    try:
-        if unit == "doge":
-            response = transaction(update.message.from_user.username, destinataire, montant)
-    except NotEnoughDoge:
-        message = "Pas assez de doge @" + update.message.from_user.username
-    except NoAccountError as e:
-        message = "Vous n'avez pas de compte @" + str(e) + '\n\n' \
-                  + "Utilisez /register pour démarrer"
+    if len(args != 3):
+        bot.send_message(chat_id=update.message.chat_id, text="Syntaxe : /dogetip xxx doge @destinataire")
     else:
-        txid = response['data']['txid']
-        message = '🚀 Transaction effectuée 🚀\n\n' \
-                  + str(montant) + ' ' + NETWORK + '\n' \
-                  + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
-                  + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
+        montant = int(args[0])
+        unit = args[1]
+        destinataire = args[2][1:]
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.HTML, text=message)
+        try:
+            if unit == "doge":
+                response = transaction(update.message.from_user.username, destinataire, montant)
+        except NotEnoughDoge:
+            message = "Pas assez de doge @" + update.message.from_user.username
+        except NoAccountError as e:
+            message = "Vous n'avez pas de compte @" + str(e) + '\n\n' \
+                    + "Utilisez /register pour démarrer"
+        else:
+            txid = response['data']['txid']
+            message = '🚀 Transaction effectuée 🚀\n\n' \
+                    + str(montant) + ' ' + NETWORK + '\n' \
+                    + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
+                    + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
+
+        bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.HTML, text=message)
 
 def register(bot, update):
     try:
