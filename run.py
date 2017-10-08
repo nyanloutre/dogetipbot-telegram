@@ -92,12 +92,15 @@ def dogetip(bot, update, args):
     if unit == "doge":
         response = transaction(update.message.from_user.username, destinataire, montant)
 
-    txid = response['data']['txid']
-
-    message = '🚀 Transaction effectuée 🚀\n\n' \
-              + str(montant) + ' ' + NETWORK + '\n' \
-              + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
-              + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
+    try:
+        txid = response['data']['txid']
+    except TypeError:
+        message = response
+    else:
+        message = '🚀 Transaction effectuée 🚀\n\n' \
+                  + str(montant) + ' ' + NETWORK + '\n' \
+                  + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
+                  + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
 
     bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.HTML, text=message)
 
