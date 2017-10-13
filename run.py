@@ -1,4 +1,4 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler
 from telegram import ParseMode
 from block_io import BlockIo, BlockIoAPIError
 import logging
@@ -12,21 +12,27 @@ NETWORK = os.environ['NETWORK']
 # Logging
 
 logging.basicConfig(level=logging.ERROR,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                    format='%(asctime)s - %(name)s - %(levelname)s - \
+                    %(message)s')
 
 # Exceptions
+
 
 class NoAccountError(Exception):
     pass
 
+
 class NotEnoughDoge(Exception):
     pass
+
 
 class AccountExisting(Exception):
     pass
 
+
 class NotValidUnit(Exception):
     pass
+
 
 # BlockIO
 
@@ -35,13 +41,16 @@ block_io = BlockIo(BLOCK_IO_API_KEY, BLOCK_IO_PIN, version)
 
 # Core functions
 
+
 def get_balance(account):
     try:
         response = block_io.get_address_by(label=account)
     except BlockIoAPIError:
         raise NoAccountError(account)
     else:
-        return (float(response['data']['available_balance']), float(response['data']['pending_received_balance']))
+        return (float(response['data']['available_balance']),
+                float(response['data']['pending_received_balance']))
+
 
 def create_address(account):
     try:
@@ -51,6 +60,7 @@ def create_address(account):
     else:
         return response['data']['address']
 
+
 def get_address(account):
     try:
         response = block_io.get_address_by(label=account)
@@ -59,20 +69,28 @@ def get_address(account):
     else:
         return response['data']['address']
 
+
 def transaction(sender, receiver, amount):
     try:
         if get_balance(sender)[0] > amount:
-            address_receiver = get_address(receiver)
-            return block_io.withdraw_from_labels(amounts=amount, from_labels=sender, to_labels=receiver, priority="low")
+            get_address(receiver)
+            return block_io.withdraw_from_labels(amounts=amount,
+                                                 from_labels=sender,
+                                                 to_labels=receiver,
+                                                 priority="low")
         else:
             raise NotEnoughDoge
     except NoAccountError:
         raise
 
+
 def address_transaction(account, address, amount):
     try:
         if get_balance(account)[0] > amount:
-            return block_io.withdraw_from_labels(amounts=amount, from_labels=account, to_addresses=address, priority="low")
+            return block_io.withdraw_from_labels(amounts=amount,
+                                                 from_labels=account,
+                                                 to_addresses=address,
+                                                 priority="low")
         else:
             return NotEnoughDoge
     except NoAccountError:
@@ -80,8 +98,12 @@ def address_transaction(account, address, amount):
 
 # Telegram functions
 
+
 def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, text="Bark ! Je suis un tipbot Dogecoin ! \n\n Pour commencer envoyez moi /register")
+    bot.send_message(chat_id=update.message.chat_id,
+                     text="Bark ! Je suis un tipbot Dogecoin ! \n\n \
+                     Pour commencer envoyez moi /register")
+
 
 def dogetip(bot, update, args):
     try:
@@ -89,11 +111,13 @@ def dogetip(bot, update, args):
         unit = args[1]
         destinataire = args[2][1:]
     except (IndexError, ValueError):
-        bot.send_message(chat_id=update.message.chat_id, text="Syntaxe : /dogetip xxx doge @destinataire")
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Syntaxe : /dogetip xxx doge @destinataire")
     else:
         try:
             if unit == "doge":
-                response = transaction(update.message.from_user.username, destinataire, montant)
+                response = transaction(update.message.from_user.username,
+                                       destinataire, montant)
             else:
                 raise NotValidUnit(unit)
         except NotEnoughDoge:
@@ -106,28 +130,42 @@ def dogetip(bot, update, args):
         else:
             txid = response['data']['txid']
             message = '🚀 Transaction effectuée 🚀\n\n' \
-                    + str(montant) + ' ' + NETWORK + '\n' \
-                    + '@' + update.message.from_user.username + ' → @' + destinataire + '\n\n' \
-                    + '<a href="https://chain.so/tx/' + NETWORK + '/' + txid + '">Voir la transaction</a>'
+                + str(montant) + ' ' + NETWORK + '\n' \
+                + '@' + update.message.from_user.username + ' → @' \
+                + destinataire + '\n\n' \
+                + '<a href="https://chain.so/tx/' + NETWORK + '/' \
+                + txid + '">Voir la transaction</a>'
 
-        bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.HTML, text=message)
+        bot.send_message(chat_id=update.message.chat_id,
+                         parse_mode=ParseMode.HTML, text=message)
+
 
 def register(bot, update):
     try:
         address = create_address(update.message.from_user.username)
     except AccountExisting:
-        bot.send_message(chat_id=update.message.chat_id, text="Vous avez déjà un compte")
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Vous avez déjà un compte")
     else:
         bot.send_message(chat_id=update.message.chat_id, text=address)
+
 
 def infos(bot, update):
     try:
         address = get_address(update.message.from_user.username)
-        balance, unconfirmed_balance = get_balance(update.message.from_user.username)
+        balance, unconfirmed_balance = \
+            get_balance(update.message.from_user.username)
     except NoAccountError as e:
-        bot.send_message(chat_id=update.message.chat_id, text="Vous n'avez pas de compte @" + str(e) + '\n\n' + "Utilisez /register pour démarrer")
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="Vous n'avez pas de compte @" + str(e) + '\n\n'
+                         + "Utilisez /register pour démarrer")
     else:
-        bot.send_message(chat_id=update.message.chat_id, text=address + "\n\n" + str(balance) + " " + NETWORK + "\n" + str(unconfirmed_balance) + " " + NETWORK + " unconfirmed")
+        bot.send_message(chat_id=update.message.chat_id,
+                         text=address + "\n\n" +
+                         str(balance) + " " + NETWORK + "\n" +
+                         str(unconfirmed_balance) + " " +
+                         NETWORK + " unconfirmed")
+
 
 def withdraw(bot, update, args):
     montant = int(args[0])
@@ -135,14 +173,16 @@ def withdraw(bot, update, args):
     address = args[2]
 
     if unit == "doge":
-        response = address_transaction(update.message.from_user.username, address, montant)
+        response = address_transaction(update.message.from_user.username,
+                                       address, montant)
 
     txid = response['data']['txid']
 
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Transaction effectuée !\n [tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
+    bot.send_message(chat_id=update.message.chat_id,
+                     parse_mode=ParseMode.MARKDOWN,
+                     text="Transaction effectuée !\n" +
+                     "[tx](https://chain.so/tx/" + NETWORK + "/" + txid + ")")
 
-def testing(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN, text="Bonjour @V_IAL")
 
 # Telegram initialisation
 
@@ -163,9 +203,6 @@ dispatcher.add_handler(infos_handler)
 
 withdraw_handler = CommandHandler('withdraw', withdraw, pass_args=True)
 dispatcher.add_handler(withdraw_handler)
-
-testing_handler = CommandHandler('testing', testing)
-dispatcher.add_handler(testing_handler)
 
 updater.start_polling()
 updater.idle()
