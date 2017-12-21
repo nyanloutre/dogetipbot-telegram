@@ -55,7 +55,7 @@ def get_balance(account):
 
 
 def get_value(amount):
-    if(NETWORK == "doge"):
+    if(NETWORK == "DOGE"):
         with urllib.request.urlopen("https://api.coinmarketcap.com/v1/ticker" +
                                     "/dogecoin/?convert=EUR") as url:
             data = json.loads(url.read().decode())
