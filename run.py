@@ -3,6 +3,8 @@ from telegram import ParseMode
 from block_io import BlockIo, BlockIoAPIError
 import logging
 import os
+import urllib.request
+import json
 
 BLOCK_IO_API_KEY = os.environ['BLOCK_IO_API_KEY']
 BLOCK_IO_PIN = os.environ['BLOCK_IO_PIN']
@@ -50,6 +52,14 @@ def get_balance(account):
     else:
         return (float(response['data']['available_balance']),
                 float(response['data']['pending_received_balance']))
+
+
+def get_value(amount):
+    if(NETWORK == "doge"):
+        with urllib.request.urlopen("https://api.coinmarketcap.com/v1/ticker" +
+                                    "/dogecoin/?convert=EUR") as url:
+            data = json.loads(url.read().decode())
+            return float(data[0]['price_eur'])*amount
 
 
 def create_address(account):
@@ -155,6 +165,7 @@ def infos(bot, update):
         address = get_address(update.message.from_user.username)
         balance, unconfirmed_balance = \
             get_balance(update.message.from_user.username)
+        value = get_value(balance)
     except NoAccountError as e:
         bot.send_message(chat_id=update.message.chat_id,
                          text="Vous n'avez pas de compte @" + str(e) + '\n\n'
@@ -162,7 +173,8 @@ def infos(bot, update):
     else:
         bot.send_message(chat_id=update.message.chat_id,
                          text=address + "\n\n" +
-                         str(balance) + " " + NETWORK + "\n" +
+                         str(balance) + " " + NETWORK +
+                         " (" + str(value) + " €)" + "\n" +
                          str(unconfirmed_balance) + " " +
                          NETWORK + " unconfirmed")
 
