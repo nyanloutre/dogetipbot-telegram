@@ -59,7 +59,7 @@ def get_value(amount):
         with urllib.request.urlopen("https://api.coinmarketcap.com/v1/ticker" +
                                     "/dogecoin/?convert=EUR") as url:
             data = json.loads(url.read().decode())
-            return float(data[0]['price_eur'])*amount
+            return round(float(data[0]['price_eur'])*amount, 2)
 
 
 def create_address(account):
